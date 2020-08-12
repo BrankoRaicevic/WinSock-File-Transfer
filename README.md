@@ -9,11 +9,11 @@ The server app is designed to be multithreaded so it can accept multiple incomin
 
 Client side:
 
-Arguments: '>winsockclient [IP address] -f [FILENAME]'
+Arguments: `>winsockclient [IP address] -f [FILENAME]`
 
-Example: '>winsockclient 192.168.1.1 -f image.png'
+Example: `>winsockclient 192.168.1.1 -f image.png`
 
-If the server is on the same PC, instead of IP address you enter 'localhost'
+If the server is on the same PC, instead of IP address you enter `localhost`
 
 ### Future improvement:
 * Add additional functionallity
