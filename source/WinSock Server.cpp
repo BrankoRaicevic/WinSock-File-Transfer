@@ -18,7 +18,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 // #pragma comment (lib, "Mswsock.lib")
 
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 10000 //1 MB
 #define DEFAULT_PORT "27015"
 
 unsigned __stdcall ClientSession(void* data);
@@ -165,7 +165,7 @@ unsigned __stdcall ClientSession(void* data) {
 	//do {
 		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0) {
-			printf("Bytes received: %d\n", iResult);
+			//printf("Bytes received: %d\n", iResult);
 		}
 		else if (iResult == 0)
 			printf("Going forward...\n");
@@ -210,7 +210,7 @@ unsigned __stdcall ClientSession(void* data) {
 
 		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0) {
-			printf("Bytes received: %d\n", iResult);
+			//printf("Bytes received: %d\n", iResult);
 			for (int i = 0; i < iResult; i++) {
 				fp.write(&recvbuf[i], 1);
 			}

@@ -16,7 +16,7 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 10000
 #define DEFAULT_PORT "27015"
 
 #define FILE_TRANSFER_FLAG 0x01
@@ -116,7 +116,7 @@ int __cdecl main(int argc, char** argv)
 		while (1) {
 			iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
 			if (iResult > 0) {
-				printf("Bytes received: %d\n", iResult);
+				//printf("Bytes received: %d\n", iResult);
 				int answer = (int)recvbuf[0];
 				if (answer == FILE_ACK_FLAG) {
 					doTransfer = true;
@@ -153,7 +153,7 @@ int __cdecl main(int argc, char** argv)
 				fp.read(&byte, 1);
 				sendbuf[check] = byte;
 				check++;
-				if (check >= 500) {
+				if (check >= DEFAULT_BUFLEN) {
 					iResult = send(ConnectSocket, sendbuf, check, 0);
 					check = 0;
 					if (iResult == SOCKET_ERROR) {
@@ -163,7 +163,7 @@ int __cdecl main(int argc, char** argv)
 						return 1;
 					}
 
-					printf("Bytes Sent: %ld\n", iResult);
+					//printf("Bytes Sent: %ld\n", iResult);
 
 
 					//iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
@@ -184,11 +184,11 @@ int __cdecl main(int argc, char** argv)
 					return 1;
 				}
 
-				printf("Bytes Sent: %ld\n", iResult);
+				//printf("Bytes Sent: %ld\n", iResult);
 			}
 
 
-			printf("Bytes Sent: %ld\n", iResult);
+			//printf("Bytes Sent: %ld\n", iResult);
 			fp.close();
 		}
 	}
