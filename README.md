@@ -13,7 +13,7 @@ Arguments: `>winsockclient [IP address] -f [FILENAME]`
 
 Example: `>winsockclient 192.168.1.1 -f image.png`
 
-If the server is on the same PC, instead of IP address you enter `localhost`
+Server: All you have to do is run the executable. If the server is on the same PC, instead of the IP address you need to use `localhost`
 
 ### Future improvement:
 * Add additional functionallity
