@@ -18,8 +18,11 @@
 #pragma comment (lib, "Ws2_32.lib")
 // #pragma comment (lib, "Mswsock.lib")
 
-#define DEFAULT_BUFLEN 10000 //1 MB
+#define DEFAULT_BUFLEN 10'000'000
 #define DEFAULT_PORT "27015"
+
+#define FILE_TRANSFER_FLAG 0x01
+#define FILE_ACK_FLAG 0x11
 
 unsigned __stdcall ClientSession(void* data);
 
@@ -34,9 +37,8 @@ int __cdecl main(void)
 	struct addrinfo* result = NULL;
 	struct addrinfo hints;
 
-	int iSendResult;
-	char recvbuf[DEFAULT_BUFLEN];
-	int recvbuflen = DEFAULT_BUFLEN;
+	//char recvbuf[DEFAULT_BUFLEN];
+	//int recvbuflen = DEFAULT_BUFLEN; //not used
 
 	fd_set readFDs = { 0 };
 	TIMEVAL tv = { 0 };
@@ -128,7 +130,7 @@ int __cdecl main(void)
 				inet_ntop(AF_INET, &(addr.sin_addr), ipinput, INET_ADDRSTRLEN);
 				printf("Accepted Connection from :  %s\n", ipinput);
 				unsigned threadID;
-				HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, &ClientSession, (void*)ClientSocket, 0, &threadID);
+				/*HANDLE hThread = (HANDLE)*/_beginthreadex(NULL, 0, &ClientSession, (void*)ClientSocket, 0, &threadID); //result hThread not used
 			}
 		}
 	}
@@ -136,28 +138,20 @@ int __cdecl main(void)
 }
 
 unsigned __stdcall ClientSession(void* data) {
-	WSADATA wsaData;
+	//WSADATA wsaData;
 	int iResult;
 
-	SOCKET ListenSocket = INVALID_SOCKET;
+	//SOCKET ListenSocket = INVALID_SOCKET; //not used
 	SOCKET ClientSocket = INVALID_SOCKET;
 
-	struct addrinfo* result = NULL;
-	struct addrinfo hints;
+	//struct addrinfo* result = NULL;  //not used
 
-	int iSendResult;
-	char recvbuf[DEFAULT_BUFLEN];
+	//char recvbuf[DEFAULT_BUFLEN];
+	char* recvbuf = new char[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
-	char sendbuf[DEFAULT_BUFLEN];
-	int sendbuflen = DEFAULT_BUFLEN;
-
-#define FILE_TRANSFER_FLAG 0x01
-#define FILE_ACK_FLAG 0x11
-
-	//std::fstream fp("result.jpg", std::ios::out | std::ios::binary);
+	char sendbuf[3];
+	//int sendbuflen = 3; //not used
 	std::string recieveFlag;
-	//char* filename;
-	//bool doTransfer = false;
 
 	ClientSocket = (SOCKET)data;
 	// Recieving flag
@@ -180,8 +174,6 @@ unsigned __stdcall ClientSession(void* data) {
 
 	if (recieveFlag[0] == FILE_TRANSFER_FLAG) {
 		recieveFlag = recieveFlag.substr(1);
-		//doTransfer = true;
-		//recieveFlag.copy(filename, 2);
 	}
 	else {
 		printf("Error - invalid flag\n");
@@ -207,13 +199,10 @@ unsigned __stdcall ClientSession(void* data) {
 		return 1;
 	}
 	do {
-
 		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0) {
 			//printf("Bytes received: %d\n", iResult);
-			for (int i = 0; i < iResult; i++) {
-				fp.write(&recvbuf[i], 1);
-			}
+			fp.write(recvbuf, iResult);
 		}
 		else if (iResult == 0)
 			printf("Connection closing...\n");

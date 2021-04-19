@@ -16,7 +16,7 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 
-#define DEFAULT_BUFLEN 10000
+#define DEFAULT_BUFLEN 10'000'000
 #define DEFAULT_PORT "27015"
 
 #define FILE_TRANSFER_FLAG 0x01
@@ -29,10 +29,11 @@ int __cdecl main(int argc, char** argv)
 	struct addrinfo* result = NULL,
 		* ptr = NULL,
 		hints;
-	char sendbuf[DEFAULT_BUFLEN];
-	char recvbuf[DEFAULT_BUFLEN];
+	//char sendbuf[DEFAULT_BUFLEN];
+	char* sendbuf = new char[DEFAULT_BUFLEN];
+	char recvbuf[3];
 	int iResult;
-	int recvbuflen = DEFAULT_BUFLEN;
+	int recvbuflen = 3;
 	std::fstream fp;
 
 	// Validate the parameters
@@ -92,15 +93,19 @@ int __cdecl main(int argc, char** argv)
 	}
 
 	// Send an initial buffer
-	char byte;
-	int check = 0;
+	//char byte;
+	//int check = 0;
 	bool doTransfer = false;
 	// -f for file
 	if (!strcmp(argv[2], "-f")) {
 		// Telling the server i want to send a file
 		sendbuf[0] = FILE_TRANSFER_FLAG;
 		sendbuf[1] = 0;
-		strcat_s(sendbuf, argv[3]);
+		//strcat_s(sendbuf, argv[3]);
+		int length = strlen(argv[3]);
+		for (int i = 0; i < length + 1; i++) {  //length + 1 is so that the string is NULL-ed
+			sendbuf[i + 1] = argv[3][i];
+		}
 		sendbuf[strlen(sendbuf) + 1] = 0;
 		iResult = send(ConnectSocket, sendbuf, strlen(sendbuf) + 1, 0);
 		if (iResult == SOCKET_ERROR) {
@@ -117,8 +122,8 @@ int __cdecl main(int argc, char** argv)
 			iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
 			if (iResult > 0) {
 				//printf("Bytes received: %d\n", iResult);
-				int answer = (int)recvbuf[0];
-				if (answer == FILE_ACK_FLAG) {
+				//int answer = (int)recvbuf[0];
+				if ((int)recvbuf[0] == FILE_ACK_FLAG) {
 					doTransfer = true;
 				}
 				else {
@@ -150,44 +155,15 @@ int __cdecl main(int argc, char** argv)
 				return 1;
 			}
 			while (!fp.eof()) {
-				fp.read(&byte, 1);
-				sendbuf[check] = byte;
-				check++;
-				if (check >= DEFAULT_BUFLEN) {
-					iResult = send(ConnectSocket, sendbuf, check, 0);
-					check = 0;
-					if (iResult == SOCKET_ERROR) {
-						printf("send failed with error: %d\n", WSAGetLastError());
-						closesocket(ConnectSocket);
-						WSACleanup();
-						return 1;
-					}
-
-					//printf("Bytes Sent: %ld\n", iResult);
-
-
-					//iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
-					//if (iResult > 0)
-					//	printf("Bytes received: %d\n", iResult);
-					//else if (iResult == 0)
-					//	printf("No bytes recieved, continuing\n");
-					//else
-					//	printf("recv failed with error: %d\n", WSAGetLastError());
-				}
-			}
-			if (check != 0) {
-				iResult = send(ConnectSocket, sendbuf, check - 1, 0);
+				fp.read(sendbuf, DEFAULT_BUFLEN);
+				iResult = send(ConnectSocket, sendbuf, fp.gcount(), 0);
 				if (iResult == SOCKET_ERROR) {
 					printf("send failed with error: %d\n", WSAGetLastError());
 					closesocket(ConnectSocket);
 					WSACleanup();
 					return 1;
 				}
-
-				//printf("Bytes Sent: %ld\n", iResult);
 			}
-
-
 			//printf("Bytes Sent: %ld\n", iResult);
 			fp.close();
 		}
